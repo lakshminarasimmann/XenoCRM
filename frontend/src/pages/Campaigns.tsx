@@ -34,7 +34,7 @@ export default function Campaigns() {
 
   const fetchSegments = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/segments');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/segments`);
       setSegments(res.data);
     } catch (error) {
       console.error(error);
@@ -47,7 +47,7 @@ export default function Campaigns() {
     setVariants([]);
     setSelectedVariantIdx(null);
     try {
-      const res = await axios.post('http://localhost:3000/api/campaigns/draft', { segmentId, prompt });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns/draft`, { segmentId, prompt });
       setVariants(res.data.variants || []);
     } catch (error) {
       console.error('Draft failed', error);
@@ -66,7 +66,7 @@ export default function Campaigns() {
     setIsSimulating(true);
     setSimulationResult(null);
     try {
-      const res = await axios.post('http://localhost:3000/api/campaigns/simulate', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns/simulate`, {
         segmentId,
         messageTemplate
       });
@@ -84,7 +84,7 @@ export default function Campaigns() {
     setIsValidating(true);
     setValidationResult(null);
     try {
-      const res = await axios.post('http://localhost:3000/api/campaigns/validate', {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns/validate`, {
         messageTemplate
       });
       setValidationResult(res.data);
@@ -104,7 +104,7 @@ export default function Campaigns() {
     setShowWarningModal(false);
     setIsDispatching(true);
     try {
-      await axios.post('http://localhost:3000/api/campaigns', {
+      await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns`, {
         name: name || `Campaign ${new Date().toLocaleDateString()}`,
         segmentId,
         messageTemplate

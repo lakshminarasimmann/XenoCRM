@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Bot, Search, Sparkles } from 'lucide-react';
+import { Bot, Search, Sparkles, Trash2 } from 'lucide-react';
 import Tilt from 'react-parallax-tilt';
 
 export default function Audience() {
@@ -14,9 +14,22 @@ export default function Audience() {
     fetchSegments();
   }, []);
 
+  const handleDeleteSegment = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this segment? Any campaigns attached to it will also be deleted.')) return;
+    
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/segments/${id}`);
+      fetchSegments();
+    } catch (error) {
+      console.error('Error deleting segment:', error);
+      alert('Failed to delete segment');
+    }
+  };
+
   const fetchSegments = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/segments');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/segments`);
       setSegments(res.data);
     } catch (error) {
       console.error(error);
@@ -31,13 +44,19 @@ export default function Audience() {
     setResult(null);
 
     try {
-      const res = await axios.post('http://localhost:3000/api/segments', { prompt, name });
+      const res = await axios.post(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/segments`, { prompt, name });
       setResult(res.data);
       fetchSegments();
       setPrompt('');
       setName('');
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      const msg = error.response?.data?.error || '';
+      if (msg.includes('429') || msg.includes('quota') || msg.includes('Too Many Requests')) {
+        alert('Google AI Rate Limit Reached! The free tier allows 15 requests per minute. Please wait 60 seconds.');
+      } else {
+        alert('Failed to generate segment. Try a simpler prompt.');
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -155,9 +174,18 @@ export default function Audience() {
                 <div key={seg.id} style={{ padding: '16px', borderRadius: 'var(--radius-md)', background: 'var(--bg-sidebar)', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'all 0.2s ease' }} onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--border-hover)'; e.currentTarget.style.background = 'var(--bg-input)'; }} onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border-color)'; e.currentTarget.style.background = 'var(--bg-sidebar)'; }}>
                   <div className="flex-between" style={{ marginBottom: '8px' }}>
                     <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'white' }}>{seg.name}</h4>
-                    <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
-                      {seg.size} users
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span className="badge badge-neutral" style={{ fontSize: '11px' }}>
+                        {seg.size} users
+                      </span>
+                      <button 
+                        onClick={(e) => handleDeleteSegment(e, seg.id)}
+                        style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+                        title="Delete Segment"
+                      >
+                        <Trash2 size={14} className="hover:text-red-500 transition-colors" />
+                      </button>
+                    </div>
                   </div>
                   <p style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{seg.criteria}</p>
                 </div>

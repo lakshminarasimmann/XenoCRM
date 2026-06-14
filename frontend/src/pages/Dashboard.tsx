@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Sparkles, Activity, Users, Send, BrainCircuit, Rocket, Zap, Bot } from 'lucide-react';
+import { Sparkles, Activity, Users, Send, BrainCircuit, Rocket, Zap, Bot, Trash2 } from 'lucide-react';
 import Tilt from 'react-parallax-tilt';
 
 export default function Dashboard() {
@@ -11,11 +11,26 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+    const interval = setInterval(fetchDashboardData, 5000);
+    return () => clearInterval(interval);
   }, []);
+
+  const handleDeleteCampaign = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this campaign?')) return;
+    
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns/${id}`);
+      fetchDashboardData();
+    } catch (error) {
+      console.error('Error deleting campaign:', error);
+      alert('Failed to delete campaign');
+    }
+  };
 
   const fetchDashboardData = async () => {
     try {
-      const res = await axios.get('http://localhost:3000/api/campaigns');
+      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns`);
       setCampaigns(res.data);
       setLoading(false);
       
@@ -30,9 +45,9 @@ export default function Dashboard() {
     }
   };
 
-  const fetchInsight = async (id: string) => {
+  const fetchInsights = async (id: string) => {
     try {
-      const res = await axios.get(`http://localhost:3000/api/campaigns/${id}/insights`);
+      const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns/${id}/insights`);
       setInsights(prev => ({ ...prev, [id]: res.data.insights }));
     } catch (error) {
       console.error('Error fetching insight:', error);
@@ -112,8 +127,17 @@ export default function Dashboard() {
                     <h3 style={{ fontSize: '18px', color: 'white', marginBottom: '4px', fontWeight: 600 }}>{camp.name}</h3>
                     <p style={{ fontSize: '13px', color: 'var(--text-muted)' }}><Users size={12} style={{display: 'inline', marginRight:'4px'}}/>{camp.segment.name}</p>
                   </div>
-                  <div className={`badge ${camp.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`}>
-                    {camp.status}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className={`badge ${camp.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`}>
+                      {camp.status}
+                    </div>
+                    <button 
+                      onClick={(e) => handleDeleteCampaign(e, camp.id)}
+                      style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px' }}
+                      title="Delete Campaign"
+                    >
+                      <Trash2 size={16} className="hover:text-red-500 transition-colors" />
+                    </button>
                   </div>
                 </div>
 
