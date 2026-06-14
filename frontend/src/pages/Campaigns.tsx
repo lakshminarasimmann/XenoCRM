@@ -273,18 +273,29 @@ export default function Campaigns() {
                   {isSimulating ? <Loader className="animate-spin" size={20} /> : 'Simulate Campaign'}
                 </button>
 
-                <button 
-                  type="submit" 
-                  disabled={isValidating || isDispatching || !messageTemplate || !segmentId}
-                  className="btn btn-primary"
-                  style={{ flex: 1, padding: '16px' }}
-                >
-                  {isValidating || isDispatching ? (
-                    <Loader className="animate-spin" size={20} />
-                  ) : (
-                    <div className="flex-row flex-center">Validate & Launch <Rocket size={20} /></div>
-                  )}
-                </button>
+                {validationResult?.status === 'FAIL' ? (
+                  <button 
+                    type="button" 
+                    disabled={true}
+                    className="btn"
+                    style={{ flex: 1, padding: '16px', background: 'var(--bg-input)', color: 'var(--text-muted)', cursor: 'not-allowed', border: '1px solid var(--accent-red)' }}
+                  >
+                    Campaign Blocked for Spam
+                  </button>
+                ) : (
+                  <button 
+                    type="submit" 
+                    disabled={isValidating || isDispatching || !messageTemplate || !segmentId}
+                    className="btn btn-primary"
+                    style={{ flex: 1, padding: '16px' }}
+                  >
+                    {isValidating || isDispatching ? (
+                      <Loader className="animate-spin" size={20} />
+                    ) : (
+                      <div className="flex-row flex-center">Validate & Launch <Rocket size={20} /></div>
+                    )}
+                  </button>
+                )}
               </div>
             </form>
           </div>
