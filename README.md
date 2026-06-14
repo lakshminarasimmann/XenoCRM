@@ -57,9 +57,6 @@ This CRM abandons traditional clunky UI filters and manual drafting in favor of 
 cd backend-crm
 npm install
 
-# IMPORTANT: Add your Gemini API Key to the .env file
-# GEMINI_API_KEY="your-api-key-here"
-
 npx prisma generate
 npx prisma db push
 
