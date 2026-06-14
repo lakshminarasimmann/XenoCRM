@@ -45,7 +45,7 @@ export default function Dashboard() {
     }
   };
 
-  const fetchInsights = async (id: string) => {
+  const fetchInsight = async (id: string) => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/campaigns/${id}/insights`);
       setInsights(prev => ({ ...prev, [id]: res.data.insights }));
